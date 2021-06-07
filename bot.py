@@ -33,23 +33,27 @@ STOCKS_STR = None
 UPDATE_INTERVAL_SECS = 30 * 60
 
 
+def get_stock_str(current_stocks, key):
+    pad = (3 if len(key) == 3 else 4) * " "
+    stock_str = f"{key}{pad}{current_stocks[key]['status']} ({current_stocks[key]['fill_level']}%)\n"
+    return stock_str
+
+
 def update_stocks():
     global STOCKS_STR
 
     current_stocks = get_bloodstocks()
     stock_str = "*All Blood Levels*\n```\n"
     for k in current_stocks:
-        pad = (3 if len(k) == 3 else 4) * " "
-        stock_str += f"{k}{pad}{current_stocks[k]}\n"
+        stock_str += get_stock_str(current_stocks, k)
     stock_str += "```\n"
 
     stock_str += "*Moderate* ⚠️\n```\n"
     has_condition = False
     for k in current_stocks:
-        if current_stocks[k] == "Moderate":
+        if current_stocks[k]["status"] == "Moderate":
             has_condition = True
-            pad = (3 if len(k) == 3 else 4) * " "
-            stock_str += f"{k}{pad}{current_stocks[k]}\n"
+            stock_str += get_stock_str(current_stocks, k)
     if not has_condition:
         stock_str += "None\n"
     stock_str += "```\n"
@@ -57,10 +61,9 @@ def update_stocks():
     stock_str += "*Low* ❗\n```\n"
     has_condition = False
     for k in current_stocks:
-        if current_stocks[k] == "Low":
+        if current_stocks[k]["status"] == "Low":
             has_condition = True
-            pad = (3 if len(k) == 3 else 4) * " "
-            stock_str += f"{k}{pad}{current_stocks[k]}\n"
+            stock_str += get_stock_str(current_stocks, k)
     if not has_condition:
         stock_str += "None\n"
     stock_str += "```\n"
@@ -68,10 +71,9 @@ def update_stocks():
     stock_str += "*Critical* ‼️\n```\n"
     has_condition = False
     for k in current_stocks:
-        if current_stocks[k] == "Critical":
+        if current_stocks[k]["status"] == "Critical":
             has_condition = True
-            pad = (3 if len(k) == 3 else 4) * " "
-            stock_str += f"{k}{pad}{current_stocks[k]}\n"
+            stock_str += get_stock_str(current_stocks, k)
     if not has_condition:
         stock_str += "None\n"
     stock_str += "```\n"

@@ -33,12 +33,21 @@ def get_bloodstocks():
             status_text = info_text.findAll("span", class_="status_text")[
                 1
             ].text.strip()
+            fill_level = (
+                bloodgroup_html.findAll("div", class_="fill_humam")[0]
+                .get("style")[8:]
+                .split("%")[0]
+                .strip()
+            )
             # pprint(status_text)
-            state[group["name"] + pos_neg["name"]] = status_text
+            state[group["name"] + pos_neg["name"]] = {
+                "status": status_text,
+                "fill_level": fill_level,
+            }
 
     pprint(state)
     return state
 
 
 if __name__ == "__main__":
-    get_bloodstocks()
+    print(get_bloodstocks())
