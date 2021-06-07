@@ -21,6 +21,9 @@ You can use the /check command to check stocks manually."""
 
 STOCKS_STR = None
 
+# 30 min
+UPDATE_INTERVAL_SECS = 30 * 60
+
 
 def update_stocks():
     global STOCKS_STR
@@ -98,7 +101,7 @@ def unknown(update, context):
 def setup(updater):
     update_stocks()
     j = updater.job_queue
-    job_minute = j.run_repeating(update_stocks_interval, interval=60)
+    job_minute = j.run_repeating(update_stocks_interval, interval=UPDATE_INTERVAL_SECS)
 
     # Handle initial start message
     updater.dispatcher.add_handler(CommandHandler("start", hello))
