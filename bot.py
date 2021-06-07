@@ -6,11 +6,14 @@ from telegram.ext import (
     CallbackContext,
     MessageHandler,
     Filters,
+    CallbackQueryHandler,
 )
 import telegram
 import sys
 from scraper import get_bloodstocks
 from strings import HELLO_MSG, ABOUT_MSG
+from subscribe import subscribe_c, subscribe_cb, unsubscribe_c
+from firebase_persistence import FirebasePersistence
 
 STOCKS_STR = None
 
@@ -82,7 +85,7 @@ def hello(update: Update, context: CallbackContext) -> None:
     check(update, context)
 
 
-def helpc(update: Update, context: CallbackContext) -> None:
+def help_c(update: Update, context: CallbackContext) -> None:
     """
     /help command, /start without the blood bank info
     """
@@ -127,13 +130,20 @@ def unknown(update, context):
 
 
 def error_callback(update, context):
-    print(
-        f"Update caused error {context.error} from ({update.message.chat.first_name} {update.message.chat.last_name}) \n\nUpdate: {update}"
-    )
+    print(f"\n!!!!!!!! Update caused error {context.error} \nFrom Update: {update}\n")
 
 
 def setup(token):
-    updater = Updater(token)
+    my_persistence = FirebasePersistence.from_environment(
+        store_user_data=False,
+        store_chat_data=False,
+        store_bot_data=True,
+    )
+    updater = Updater(
+        token,
+        persistence=my_persistence,
+        use_context=True,
+    )
 
     update_stocks()
     j = updater.job_queue
@@ -143,7 +153,10 @@ def setup(token):
     updater.dispatcher.add_handler(CommandHandler("start", hello))
     updater.dispatcher.add_handler(CommandHandler("check", check))
     updater.dispatcher.add_handler(CommandHandler("about", about))
-    updater.dispatcher.add_handler(CommandHandler("help", helpc))
+    updater.dispatcher.add_handler(CommandHandler("help", help_c))
+    updater.dispatcher.add_handler(CommandHandler("subscribe", subscribe_c))
+    updater.dispatcher.add_handler(CommandHandler("unsubscribe", unsubscribe_c))
+    updater.dispatcher.add_handler(CallbackQueryHandler(subscribe_cb))
 
     # Handle unknown commands
     unknown_handler = MessageHandler(Filters.command, unknown)
