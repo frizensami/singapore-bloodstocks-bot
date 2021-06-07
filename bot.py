@@ -95,10 +95,7 @@ def unknown(update, context):
     )
 
 
-def main():
-    print("Starting bot")
-    updater = Updater(sys.argv[1])
-
+def setup(updater):
     update_stocks()
     j = updater.job_queue
     job_minute = j.run_repeating(update_stocks_interval, interval=60)
@@ -110,11 +107,3 @@ def main():
     # Handle unknown commands
     unknown_handler = MessageHandler(Filters.command, unknown)
     updater.dispatcher.add_handler(unknown_handler)
-
-    updater.start_polling()
-    print("Started!")
-    updater.idle()
-
-
-if __name__ == "__main__":
-    main()
