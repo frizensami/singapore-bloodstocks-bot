@@ -19,6 +19,14 @@ You can also subscribe to updates for specific blood types so you know when to d
 
 You can use the /check command to check stocks manually."""
 
+ABOUT_MSG = """SG Blood Stocks Bot Version 0.1 (Pre-Release)
+
+This bot retrieves blood stock data from https://www.redcross.sg/
+
+Please report any bugs to the email at https://sriramsami.com.
+
+Alternatively, open a bug report at https://github.com/frizensami/sgbloodstocksbot/issues"""
+
 STOCKS_STR = None
 
 # 30 min
@@ -77,28 +85,59 @@ def update_stocks_interval(context: CallbackContext):
 
 
 def hello(update: Update, context: CallbackContext) -> None:
-    print("Received message: /start")
+    """
+    /start command, send hello message and then the check string
+    """
+    print(
+        f"Received message: /start from chat id {update.message.chat_id} ({update.message.chat.first_name} {update.message.chat.last_name})"
+    )
     update.message.reply_text(HELLO_MSG)
+    check(update, context)
+
+
+def check(update: Update, context: CallbackContext) -> None:
+    """
+    /check command, send blood stock string
+    """
+    print(
+        f"Received or processing code for: /check from chat id {update.message.chat_id} ({update.message.chat.first_name} {update.message.chat.last_name})"
+    )
     update.message.reply_text(
         STOCKS_STR, parse_mode=telegram.constants.PARSEMODE_MARKDOWN
     )
 
 
-def check(update: Update, context: CallbackContext) -> None:
-    print("Received message: /check")
+def about(update: Update, context: CallbackContext) -> None:
+    """
+    /about command, send info message
+    """
+    print(
+        f"Received message: /about from chat id {update.message.chat_id} ({update.message.chat.first_name} {update.message.chat.last_name})"
+    )
     update.message.reply_text(
-        STOCKS_STR, parse_mode=telegram.constants.PARSEMODE_MARKDOWN
+        ABOUT_MSG, parse_mode=telegram.constants.PARSEMODE_MARKDOWN
     )
 
 
 def unknown(update, context):
+    print(
+        f"Received unknown command: {update.message.text} from chat id {update.message.chat_id}"
+    )
     context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Sorry, I didn't understand that command.",
     )
 
 
-def setup(updater):
+def error_callback(update, context):
+    print(
+        f"Update caused error {context.error} from ({update.message.chat.first_name} {update.message.chat.last_name}) \n\nUpdate: {update}"
+    )
+
+
+def setup(token):
+    updater = Updater(token)
+
     update_stocks()
     j = updater.job_queue
     job_minute = j.run_repeating(update_stocks_interval, interval=UPDATE_INTERVAL_SECS)
@@ -106,7 +145,13 @@ def setup(updater):
     # Handle initial start message
     updater.dispatcher.add_handler(CommandHandler("start", hello))
     updater.dispatcher.add_handler(CommandHandler("check", check))
+    updater.dispatcher.add_handler(CommandHandler("about", about))
 
     # Handle unknown commands
     unknown_handler = MessageHandler(Filters.command, unknown)
     updater.dispatcher.add_handler(unknown_handler)
+
+    # Error handling
+    updater.dispatcher.add_error_handler(error_callback)
+
+    return updater

@@ -16,9 +16,8 @@ import sys
 
 TOKEN = sys.argv[1]
 PORT = int(os.environ.get("PORT", "8443"))
-updater = Updater(TOKEN)
 
-setup(updater)
+updater = setup(TOKEN)
 
 # add handlers
 updater.start_webhook(

@@ -15,9 +15,8 @@ import telegram
 import sys
 
 print("Starting bot")
-updater = Updater(sys.argv[1])
 
-setup(updater)
+updater = setup(sys.argv[1])
 
 updater.start_polling()
 print("Started!")
