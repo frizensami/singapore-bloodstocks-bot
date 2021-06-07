@@ -15,9 +15,9 @@ HELLO_MSG = """Welcome to the SG Blood Stocks Bot!
 
 We update you on the blood stock levels of the Singapore Red Cross.
 
-You can also subscribe to updates for specific blood types so you know when to donate (IN PROGRESS).
+You can also subscribe to updates for specific blood types so you know when to donate (Coming soon!).
 
-You can use the /check command to check stocks manually."""
+You can use the /check command to check blood stock levels manually."""
 
 ABOUT_MSG = """SG Blood Stocks Bot Version 0.1 (Pre-Release)
 
@@ -95,6 +95,16 @@ def hello(update: Update, context: CallbackContext) -> None:
     check(update, context)
 
 
+def helpc(update: Update, context: CallbackContext) -> None:
+    """
+    /help command, /start without the blood bank info
+    """
+    print(
+        f"Received message: /help from chat id {update.message.chat_id} ({update.message.chat.first_name} {update.message.chat.last_name})"
+    )
+    update.message.reply_text(HELLO_MSG)
+
+
 def check(update: Update, context: CallbackContext) -> None:
     """
     /check command, send blood stock string
@@ -146,6 +156,7 @@ def setup(token):
     updater.dispatcher.add_handler(CommandHandler("start", hello))
     updater.dispatcher.add_handler(CommandHandler("check", check))
     updater.dispatcher.add_handler(CommandHandler("about", about))
+    updater.dispatcher.add_handler(CommandHandler("help", helpc))
 
     # Handle unknown commands
     unknown_handler = MessageHandler(Filters.command, unknown)
