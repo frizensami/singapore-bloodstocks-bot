@@ -43,7 +43,7 @@ def update_stocks():
         stock_str += f"{k}{pad}{current_stocks[k]}\n"
     stock_str += "```\n"
 
-    stock_str += "*Moderate*\n```\n"
+    stock_str += "*Moderate* ⚠️\n```\n"
     has_condition = False
     for k in current_stocks:
         if current_stocks[k] == "Moderate":
@@ -54,7 +54,7 @@ def update_stocks():
         stock_str += "None\n"
     stock_str += "```\n"
 
-    stock_str += "*Low*\n```\n"
+    stock_str += "*Low* ❗\n```\n"
     has_condition = False
     for k in current_stocks:
         if current_stocks[k] == "Low":
@@ -65,7 +65,7 @@ def update_stocks():
         stock_str += "None\n"
     stock_str += "```\n"
 
-    stock_str += "*Critical*\n```\n"
+    stock_str += "*Critical* ‼️\n```\n"
     has_condition = False
     for k in current_stocks:
         if current_stocks[k] == "Critical":
