@@ -49,17 +49,17 @@ Original
  'O-': {'fill_level': '51', 'status': 'Moderate'}}
 
 """
-CURRENT_STOCKS_TEST = {
-    "A+": {"fill_level": "90", "status": "Healthy"},  # Lower fill, same state
-    "A-": {"fill_level": "69", "status": "Healthy"},
-    "AB+": {"fill_level": "100", "status": "Healthy"},
-    "AB-": {"fill_level": "20", "status": "Critical"},  # Lower fill, different state
-    "B+": {"fill_level": "100", "status": "Healthy"},
-    "B-": {"fill_level": "67", "status": "Healthy"},  # Higher fill, same state
-    "O+": {"fill_level": "100", "status": "Healthy"},
-    "O-": {"fill_level": "70", "status": "Healthy"},  # Higher fill, different state
-}
-CURRENT_STOCKS = CURRENT_STOCKS_TEST
+# CURRENT_STOCKS_TEST = {
+#     "A+": {"fill_level": "90", "status": "Healthy"},  # Lower fill, same state
+#     "A-": {"fill_level": "69", "status": "Healthy"},
+#     "AB+": {"fill_level": "100", "status": "Healthy"},
+#     "AB-": {"fill_level": "20", "status": "Critical"},  # Lower fill, different state
+#     "B+": {"fill_level": "100", "status": "Healthy"},
+#     "B-": {"fill_level": "67", "status": "Healthy"},  # Higher fill, same state
+#     "O+": {"fill_level": "100", "status": "Healthy"},
+#     "O-": {"fill_level": "70", "status": "Healthy"},  # Higher fill, different state
+# }
+# CURRENT_STOCKS = CURRENT_STOCKS_TEST
 
 # Last updated time
 LAST_BOT_UPDATE_TIME = None
