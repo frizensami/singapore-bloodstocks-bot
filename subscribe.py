@@ -4,6 +4,7 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, Callback
 from storage import *
 
 SUBSCRIBE_TEXT = """Please choose your blood type to receive alerts about its stock level.
+Alternatively, you may choose to receive updates for any changes in blood stock levels.
 """
 
 
@@ -21,13 +22,21 @@ def subscribe_c(update: Update, context: CallbackContext) -> None:
             InlineKeyboardButton("O-", callback_data="O-"),
             InlineKeyboardButton("AB-", callback_data="AB-"),
         ],
+        [InlineKeyboardButton("Any Changes", callback_data="any")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bloodtype = get_user_bloodtype_subscription(update.message.from_user, context)
     final_msg = SUBSCRIBE_TEXT
     if bloodtype is not None:
         if len(bloodtype) == 1:
-            final_msg += f"\nYou are currently subscribed to blood type {bloodtype[0]}."
+            if bloodtype[0] == "any":
+                final_msg += (
+                    f"\nYou are currently subscribed to any blood stock changes."
+                )
+            else:
+                final_msg += (
+                    f"\nYou are currently subscribed to blood type {bloodtype[0]}."
+                )
         else:
             final_msg += (
                 f"\nYou are currently subscribed to blood types {', '.join(bloodtype)}."
@@ -51,4 +60,11 @@ def subscribe_cb(update: Update, context: CallbackContext) -> None:
     # Update the bot data
     update_user_bloodtype_subscription(query.from_user, context, query.data)
 
-    query.edit_message_text(text=f"Subscribed to updates for blood type {query.data}!")
+    if query.data != "any":
+        query.edit_message_text(
+            text=f"Subscribed to updates for blood type {query.data}"
+        )
+    else:
+        query.edit_message_text(
+            text=f"Subscribed to any updates about blood stock changes."
+        )

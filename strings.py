@@ -15,3 +15,9 @@ This bot retrieves blood stock data from https://www.redcross.sg/
 Please report any bugs to the email at https://sriramsami.com.
 
 Alternatively, open a bug report at https://github.com/frizensami/sgbloodstocksbot/issues"""
+
+
+STATUS = ["Healthy", "Moderate", "Low", "Critical"]
+
+UP_ARROW = "⬆️"
+DOWN_ARROW = "🔻"

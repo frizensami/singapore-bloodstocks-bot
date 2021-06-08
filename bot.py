@@ -10,68 +10,144 @@ from telegram.ext import (
 )
 import telegram
 import sys
+from datetime import datetime
+
+# Us
 from scraper import get_bloodstocks
 from strings import HELLO_MSG, ABOUT_MSG
 from subscribe import subscribe_c, subscribe_cb, unsubscribe_c
 from firebase_persistence import FirebasePersistence
-
-STOCKS_STR = None
+from stocks import (
+    format_stocks,
+    get_stock_diffs,
+    diffs_to_str,
+    diffs_with_bloodtype_to_str,
+)
+from storage import *
 
 # 30 min
-UPDATE_INTERVAL_SECS = 30 * 60
+UPDATE_INTERVAL_SECS = 20 * 60
+
+# Already formatted string to pass to /check
+STOCKS_STR = None
+# Stocks retrieved from previous pass
+OLD_STOCKS = None
+
+# Current stocks
+CURRENT_STOCKS = None
+
+# Test: first message from bot should be an auto update if we are subscribed appropriately
+"""
+Original
+{'A+': {'fill_level': '100', 'status': 'Healthy'},
+ 'A-': {'fill_level': '69', 'status': 'Healthy'},
+ 'AB+': {'fill_level': '100', 'status': 'Healthy'},
+ 'AB-': {'fill_level': '40', 'status': 'Low'},
+ 'B+': {'fill_level': '100', 'status': 'Healthy'},
+ 'B-': {'fill_level': '66', 'status': 'Healthy'},
+ 'O+': {'fill_level': '100', 'status': 'Healthy'},
+ 'O-': {'fill_level': '51', 'status': 'Moderate'}}
+
+"""
+CURRENT_STOCKS_TEST = {
+    "A+": {"fill_level": "90", "status": "Healthy"},  # Lower fill, same state
+    "A-": {"fill_level": "69", "status": "Healthy"},
+    "AB+": {"fill_level": "100", "status": "Healthy"},
+    "AB-": {"fill_level": "20", "status": "Critical"},  # Lower fill, different state
+    "B+": {"fill_level": "100", "status": "Healthy"},
+    "B-": {"fill_level": "67", "status": "Healthy"},  # Higher fill, same state
+    "O+": {"fill_level": "100", "status": "Healthy"},
+    "O-": {"fill_level": "70", "status": "Healthy"},  # Higher fill, different state
+}
+CURRENT_STOCKS = CURRENT_STOCKS_TEST
+
+# Last updated time
+LAST_BOT_UPDATE_TIME = None
+LAST_REDCROSS_UPDATE_TIME = None
+
+# Diffs
+CURRENT_DIFF = None
+CURRENT_DIFF_STR = None
 
 
-def get_stock_str(current_stocks, key):
-    pad = (3 if len(key) == 3 else 4) * " "
-    stock_str = f"{key}{pad}{current_stocks[key]['status']} ({current_stocks[key]['fill_level']}%)\n"
-    return stock_str
-
-
-def update_stocks():
+def update_stocks(context: CallbackContext):
     global STOCKS_STR
+    global OLD_STOCKS
+    global CURRENT_STOCKS
+    global LAST_BOT_UPDATE_TIME
+    global LAST_REDCROSS_UPDATE_TIME
+    global CURRENT_DIFF
+    global CURRENT_DIFF_STR
 
-    current_stocks = get_bloodstocks()
-    stock_str = "*All Blood Levels*\n```\n"
-    for k in current_stocks:
-        stock_str += get_stock_str(current_stocks, k)
-    stock_str += "```\n"
+    # Replace old stocks
+    OLD_STOCKS = CURRENT_STOCKS
 
-    stock_str += "*Moderate* ⚠️\n```\n"
-    has_condition = False
-    for k in current_stocks:
-        if current_stocks[k]["status"] == "Moderate":
-            has_condition = True
-            stock_str += get_stock_str(current_stocks, k)
-    if not has_condition:
-        stock_str += "None\n"
-    stock_str += "```\n"
+    # Update new stocks
+    new_stocks = get_bloodstocks()
+    CURRENT_STOCKS = new_stocks
 
-    stock_str += "*Low* ❗\n```\n"
-    has_condition = False
-    for k in current_stocks:
-        if current_stocks[k]["status"] == "Low":
-            has_condition = True
-            stock_str += get_stock_str(current_stocks, k)
-    if not has_condition:
-        stock_str += "None\n"
-    stock_str += "```\n"
+    # Update our last update time
+    current_time = datetime.now()
+    LAST_BOT_UPDATE_TIME = current_time
 
-    stock_str += "*Critical* ‼️\n```\n"
-    has_condition = False
-    for k in current_stocks:
-        if current_stocks[k]["status"] == "Critical":
-            has_condition = True
-            stock_str += get_stock_str(current_stocks, k)
-    if not has_condition:
-        stock_str += "None\n"
-    stock_str += "```\n"
-
+    # Format /check string
+    stock_str = format_stocks(new_stocks, current_time)
     STOCKS_STR = stock_str
+
+    # Check diffs between old and current stocks
+    if OLD_STOCKS is not None and CURRENT_STOCKS is not None:
+        diffs = get_stock_diffs(CURRENT_STOCKS, OLD_STOCKS)
+
+        if diffs:
+            # Update globals
+            CURRENT_DIFF = diffs
+            LAST_REDCROSS_UPDATE_TIME = current_time
+            # Get a generic diffs string to send to all the alldiffs subscribers
+            diffs_str = diffs_to_str(diffs, LAST_REDCROSS_UPDATE_TIME)
+            CURRENT_DIFF_STR = diffs_str
+            print(diffs_str)
+            # Update all "any"-blood stock subscribers
+            update_any_subscribers(context, diffs_str)
+            # Update type-by-tye
+            for key in diffs:
+                update_subscribers_for_bloodtype(context, diffs, key)
+
+
+def update_any_subscribers(context: CallbackContext, diffs_str):
+    """
+    For subscribers that want the "any" subscription, send them the diff string
+    """
+    users = get_all_users(context)
+    for user in users:
+        if is_user_any_blood_subscription(context, user):
+            context.bot.send_message(
+                chat_id=int(user),
+                text=diffs_str,
+                parse_mode=telegram.constants.PARSEMODE_MARKDOWN,
+            )
+
+
+def update_subscribers_for_bloodtype(context: CallbackContext, diffs, bloodtype: str):
+    """
+    For specific updates on specific bloodtypes.
+    Don't send them this update if they are already subscribed to "any"
+    """
+    diffs_str = diffs_with_bloodtype_to_str(diffs, bloodtype, LAST_REDCROSS_UPDATE_TIME)
+    users = get_all_users(context)
+    for user in users:
+        if is_user_blood_subscription(
+            context, user, bloodtype
+        ) and not is_user_any_blood_subscription(context, user):
+            context.bot.send_message(
+                chat_id=int(user),
+                text=diffs_str,
+                parse_mode=telegram.constants.PARSEMODE_MARKDOWN,
+            )
 
 
 def update_stocks_interval(context: CallbackContext):
     print("Updating stocks at interval")
-    update_stocks()
+    update_stocks(context)
 
 
 def hello(update: Update, context: CallbackContext) -> None:
@@ -130,7 +206,9 @@ def unknown(update, context):
 
 
 def error_callback(update, context):
-    print(f"\n!!!!!!!! Update caused error {context.error} \nFrom Update: {update}\n")
+    print(
+        f"\n!!!!!!!! Update caused error: [[ {context.error} ]] \nFrom Update: {update}\n"
+    )
 
 
 def setup(token):
@@ -145,9 +223,11 @@ def setup(token):
         use_context=True,
     )
 
-    update_stocks()
+    # update_stocks()
     j = updater.job_queue
-    job_minute = j.run_repeating(update_stocks_interval, interval=UPDATE_INTERVAL_SECS)
+    job_minute = j.run_repeating(
+        update_stocks_interval, interval=UPDATE_INTERVAL_SECS, first=1
+    )
 
     # Handle initial start message
     updater.dispatcher.add_handler(CommandHandler("start", hello))

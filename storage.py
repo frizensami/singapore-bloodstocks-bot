@@ -19,21 +19,24 @@ USER_BLOOD_SUBSCRIPTION = "blood_subscription"
 
 
 def check_init_storage(context: CallbackContext):
-    print("Bot data:")
-    print(context.bot_data)
+    # print("Bot data:")
+    # print(context.bot_data)
     if context.bot_data.get(USER_DATA) is None:
         print("No bot-user data, initializing..")
         context.bot_data[USER_DATA] = {}
 
-    print(context.user_data)
-    print(context.chat_data)
+    # print(context.user_data)
+    # print(context.chat_data)
 
 
 def update_user_bloodtype_subscription(
     user: User, context: CallbackContext, bloodtype: str
 ):
+    """
+    Stores the user blood type subscription as a list in the bot-user dict.
+    """
     check_init_storage(context)
-    user_id = user["id"]
+    user_id = str(user["id"])
     if context.bot_data[USER_DATA].get(user_id) is None:
         context.bot_data[USER_DATA][user_id] = {USER_BLOOD_SUBSCRIPTION: [bloodtype]}
     else:
@@ -55,3 +58,22 @@ def delete_user_bloodtype_subscription(user: User, context: CallbackContext):
     check_init_storage(context)
     user_id = str(user["id"])
     return context.bot_data[USER_DATA].pop(user_id, None)
+
+
+def get_all_users(context: CallbackContext):
+    check_init_storage(context)
+    return context.bot_data[USER_DATA].keys()
+
+
+def is_user_any_blood_subscription(context: CallbackContext, user_id: str):
+    return is_user_blood_subscription(context, user_id, "any")
+
+
+def is_user_blood_subscription(context: CallbackContext, user_id: str, bloodtype: str):
+    check_init_storage(context)
+    subscription = (
+        context.bot_data[USER_DATA]
+        .get(str(user_id), {})
+        .get(USER_BLOOD_SUBSCRIPTION, None)
+    )
+    return bloodtype in subscription

@@ -14,7 +14,14 @@ BLOOD_GROUPS = [
     {"class_": "o_group", "name": "O"},
     {"class_": "ab_group", "name": "AB"},
 ]
-STATUS = ["Healthy", "Moderate", "Low", "Critical"]
+
+"""
+Status structure
+{
+    <bloodtype:str> : { status: <STATUS>, fill_level: <int> }
+}
+
+"""
 
 
 def get_bloodstocks():
