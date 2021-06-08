@@ -7,7 +7,7 @@ Storage structure for bot_data is:
 
 {
     user_data: {
-        <chat_id>:
+        <user_id>:
 
     }
 }
@@ -15,6 +15,7 @@ Storage structure for bot_data is:
 """
 
 USER_DATA = "users_data"
+USER_BLOOD_SUBSCRIPTION = "blood_subscription"
 
 
 def check_init_storage(context: CallbackContext):
@@ -33,16 +34,24 @@ def update_user_bloodtype_subscription(
 ):
     check_init_storage(context)
     user_id = user["id"]
-    context.bot_data[USER_DATA][str(user_id)] = bloodtype
+    if context.bot_data[USER_DATA].get(user_id) is None:
+        context.bot_data[USER_DATA][user_id] = {USER_BLOOD_SUBSCRIPTION: [bloodtype]}
+    else:
+        context.bot_data[USER_DATA][user_id][USER_BLOOD_SUBSCRIPTION] = [bloodtype]
 
 
 def get_user_bloodtype_subscription(user: User, context: CallbackContext):
     check_init_storage(context)
-    user_id = user["id"]
-    return context.bot_data[USER_DATA].get(str(user_id))
+    user_id = str(user["id"])
+
+    user_data = context.bot_data[USER_DATA].get(user_id)
+    if user_data == None:
+        return None
+    else:
+        return user_data.get(USER_BLOOD_SUBSCRIPTION)
 
 
 def delete_user_bloodtype_subscription(user: User, context: CallbackContext):
     check_init_storage(context)
-    user_id = user["id"]
-    return context.bot_data[USER_DATA].pop(str(user_id), None)
+    user_id = str(user["id"])
+    return context.bot_data[USER_DATA].pop(user_id, None)

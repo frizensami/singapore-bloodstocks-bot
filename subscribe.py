@@ -26,7 +26,12 @@ def subscribe_c(update: Update, context: CallbackContext) -> None:
     bloodtype = get_user_bloodtype_subscription(update.message.from_user, context)
     final_msg = SUBSCRIBE_TEXT
     if bloodtype is not None:
-        final_msg += f"\nYou are currently subscribed to blood type {bloodtype}."
+        if len(bloodtype) == 1:
+            final_msg += f"\nYou are currently subscribed to blood type {bloodtype[0]}."
+        else:
+            final_msg += (
+                f"\nYou are currently subscribed to blood types {', '.join(bloodtype)}."
+            )
     update.message.reply_text(final_msg, reply_markup=reply_markup)
 
 
