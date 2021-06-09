@@ -3,8 +3,10 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 from storage import *
 
-SUBSCRIBE_TEXT = """Please choose your blood type to receive alerts about its stock level.
-Alternatively, you may choose to receive updates for any changes in blood stock levels.
+SUBSCRIBE_TEXT = """Please choose a blood type to receive alerts about its stock level.
+
+Alternatively, you may choose to receive updates for *any* changes in blood stock levels.
+
 """
 
 
@@ -31,16 +33,14 @@ def subscribe_c(update: Update, context: CallbackContext) -> None:
         if len(bloodtype) == 1:
             if bloodtype[0] == "any":
                 final_msg += (
-                    f"\nYou are currently subscribed to any blood stock changes."
+                    f"\nYou are currently subscribed to *any* blood stock changes."
                 )
             else:
                 final_msg += (
-                    f"\nYou are currently subscribed to blood type {bloodtype[0]}."
+                    f"\nYou are currently subscribed to blood type *{bloodtype[0]}*."
                 )
         else:
-            final_msg += (
-                f"\nYou are currently subscribed to blood types {', '.join(bloodtype)}."
-            )
+            final_msg += f"\nYou are currently subscribed to blood types *{', '.join(bloodtype)}*."
     update.message.reply_text(final_msg, reply_markup=reply_markup)
 
 

@@ -15,7 +15,7 @@ import pytz
 
 # Us
 from scraper import get_bloodstocks
-from strings import HELLO_MSG, ABOUT_MSG
+from strings import HELLO_MSG, ABOUT_MSG, DONATE_MSG
 from subscribe import subscribe_c, subscribe_cb, unsubscribe_c
 from firebase_persistence import FirebasePersistence
 from stocks import (
@@ -233,6 +233,18 @@ def about(update: Update, context: CallbackContext) -> None:
     )
 
 
+def donate(update: Update, context: CallbackContext) -> None:
+    """
+    /donate command, send info message
+    """
+    print(
+        f"Received message: /donate from chat id {update.message.chat_id} ({update.message.chat.first_name} {update.message.chat.last_name})"
+    )
+    update.message.reply_text(
+        DONATE_MSG, parse_mode=telegram.constants.PARSEMODE_MARKDOWN
+    )
+
+
 def unknown(update, context):
     print(
         f"Received unknown command: {update.message.text} from chat id {update.message.chat_id}"
@@ -273,6 +285,7 @@ def setup(token):
     updater.dispatcher.add_handler(CommandHandler("changes", change))
     updater.dispatcher.add_handler(CommandHandler("about", about))
     updater.dispatcher.add_handler(CommandHandler("help", help_c))
+    updater.dispatcher.add_handler(CommandHandler("donate", donate))
     updater.dispatcher.add_handler(CommandHandler("subscribe", subscribe_c))
     updater.dispatcher.add_handler(CommandHandler("unsubscribe", unsubscribe_c))
     updater.dispatcher.add_handler(CallbackQueryHandler(subscribe_cb))
