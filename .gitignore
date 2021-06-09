@@ -2,6 +2,7 @@
 run.sh
 firebase.json
 firebase_prod.json
+run_maintenance.sh
 
 
 
