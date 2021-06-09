@@ -18,4 +18,5 @@ Bot live at http://t.me/sgbloodstocksbot or @sgbloodstocksbot.
 - Clone the repo
 - Install libraries with `pip install -r requirements.txt`
 - Get a Firebase `.json` private key file and the URL for your Firebase database. Save it as `firebase.json`.
+- Before running the bot, add at least `{'bot_data': {'users_data': {'1111': {'blood_subscription': 'all'}}}}` to the Firebase database through the web UI. This minimal seeding is necessary so that the persistence layer doesn't complain.
 - Then, run the bot with `FIREBASE_URL="YOUR URL HERE" FIREBASE_CREDENTIALS=$(< firebase.json) python3 bot_local.py "TELEGRAM BOT API KEY"`
