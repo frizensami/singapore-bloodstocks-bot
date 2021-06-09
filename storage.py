@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, User
+import json
 
 """
 Storage structure for bot_data is:
@@ -80,15 +81,19 @@ def is_user_blood_subscription(context: CallbackContext, user_id: str, bloodtype
     return bloodtype in subscription
 
 
-def update_current_diff(context: CallbackContext, diff, diffstr, difftime):
+def update_current_diff(context: CallbackContext, diff, diffstr):
     check_init_storage(context)
-    context.bot_data[USER_DATA][CURRENT_DIFF] = {
+    print(f"Updating diff {diff} \n {diffstr}")
+    # difftime_json = json.dumps(difftime, default=json_util.default)
+    # difftime_json = json.dumps(difftime, indent=4, sort_keys=True, default=str)
+
+    context.bot_data[CURRENT_DIFF] = {
         "diff": diff,
         "diff_string": diffstr,
-        "difftime": difftime,
     }
 
 
-def get_current_diff(context: CallbackContext, diff, diffstr, difftime):
+def get_current_diff_str(context: CallbackContext):
     check_init_storage(context)
-    return context.bot_data[USER_DATA].get(CURRENT_DIFF)
+    res = context.bot_data.get(CURRENT_DIFF, {}).get("diff_string", None)
+    return res

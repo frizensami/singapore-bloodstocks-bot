@@ -50,17 +50,17 @@ Original
  'O-': {'fill_level': '51', 'status': 'Moderate'}}
 
 """
-# CURRENT_STOCKS_TEST = {
-#     "A+": {"fill_level": "90", "status": "Healthy"},  # Lower fill, same state
-#     "A-": {"fill_level": "69", "status": "Healthy"},
-#     "AB+": {"fill_level": "100", "status": "Healthy"},
-#     "AB-": {"fill_level": "20", "status": "Critical"},  # Lower fill, different state
-#     "B+": {"fill_level": "100", "status": "Healthy"},
-#     "B-": {"fill_level": "67", "status": "Healthy"},  # Higher fill, same state
-#     "O+": {"fill_level": "100", "status": "Healthy"},
-#     "O-": {"fill_level": "70", "status": "Healthy"},  # Higher fill, different state
-# }
-# CURRENT_STOCKS = CURRENT_STOCKS_TEST
+CURRENT_STOCKS_TEST = {
+    "A+": {"fill_level": "90", "status": "Healthy"},  # Lower fill, same state
+    "A-": {"fill_level": "69", "status": "Healthy"},
+    "AB+": {"fill_level": "100", "status": "Healthy"},
+    "AB-": {"fill_level": "20", "status": "Critical"},  # Lower fill, different state
+    "B+": {"fill_level": "100", "status": "Healthy"},
+    "B-": {"fill_level": "67", "status": "Healthy"},  # Higher fill, same state
+    "O+": {"fill_level": "100", "status": "Healthy"},
+    "O-": {"fill_level": "70", "status": "Healthy"},  # Higher fill, different state
+}
+CURRENT_STOCKS = CURRENT_STOCKS_TEST
 
 # Last updated time
 LAST_BOT_UPDATE_TIME = None
@@ -107,15 +107,15 @@ def update_stocks(context: CallbackContext):
             # CURRENT_DIFF = diffs
             # LAST_REDCROSS_UPDATE_TIME = current_time
             # Get a generic diffs string to send to all the alldiffs subscribers
-            diffs_str = diffs_to_str(diffs, LAST_REDCROSS_UPDATE_TIME)
+            diffs_str = diffs_to_str(diffs, current_time)
             # CURRENT_DIFF_STR = diffs_str
             print(diffs_str)
-            update_current_diff(context, diffs, diffs_str, current_time)
+            update_current_diff(context, diffs, diffs_str)
             # Update all "any"-blood stock subscribers
             update_any_subscribers(context, diffs_str)
-            # Update type-by-tye
+            # Update type-by-type
             for key in diffs:
-                update_subscribers_for_bloodtype(context, diffs, key)
+                update_subscribers_for_bloodtype(context, diffs, key, current_time)
 
 
 def update_any_subscribers(context: CallbackContext, diffs_str):
@@ -123,6 +123,7 @@ def update_any_subscribers(context: CallbackContext, diffs_str):
     For subscribers that want the "any" subscription, send them the diff string
     """
     users = get_all_users(context)
+
     for user in users:
         if is_user_any_blood_subscription(context, user):
             context.bot.send_message(
@@ -132,12 +133,14 @@ def update_any_subscribers(context: CallbackContext, diffs_str):
             )
 
 
-def update_subscribers_for_bloodtype(context: CallbackContext, diffs, bloodtype: str):
+def update_subscribers_for_bloodtype(
+    context: CallbackContext, diffs, bloodtype: str, current_time
+):
     """
     For specific updates on specific bloodtypes.
     Don't send them this update if they are already subscribed to "any"
     """
-    diffs_str = diffs_with_bloodtype_to_str(diffs, bloodtype, LAST_REDCROSS_UPDATE_TIME)
+    diffs_str = diffs_with_bloodtype_to_str(diffs, bloodtype, current_time)
     users = get_all_users(context)
     for user in users:
         if is_user_blood_subscription(
@@ -186,6 +189,26 @@ def check(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(
         STOCKS_STR, parse_mode=telegram.constants.PARSEMODE_MARKDOWN
     )
+
+
+def change(update: Update, context: CallbackContext) -> None:
+    """
+    /change command, send the latest change in all blood stocks
+    """
+    print(
+        f"Received or processing code for: /change from chat id {update.message.chat_id} ({update.message.chat.first_name} {update.message.chat.last_name})"
+    )
+
+    diffstr = get_current_diff_str(context)
+    if diffstr:
+        update.message.reply_text(
+            diffstr, parse_mode=telegram.constants.PARSEMODE_MARKDOWN
+        )
+    else:
+        update.message.reply_text(
+            "No stock changes observed recently.",
+            parse_mode=telegram.constants.PARSEMODE_MARKDOWN,
+        )
 
 
 def about(update: Update, context: CallbackContext) -> None:
@@ -237,6 +260,7 @@ def setup(token):
     # Handle initial start message
     updater.dispatcher.add_handler(CommandHandler("start", hello))
     updater.dispatcher.add_handler(CommandHandler("check", check))
+    updater.dispatcher.add_handler(CommandHandler("changes", change))
     updater.dispatcher.add_handler(CommandHandler("about", about))
     updater.dispatcher.add_handler(CommandHandler("help", help_c))
     updater.dispatcher.add_handler(CommandHandler("subscribe", subscribe_c))

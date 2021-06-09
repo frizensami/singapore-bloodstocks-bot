@@ -4,11 +4,13 @@ HELLO_MSG = """Welcome to the SG Blood Stocks Bot!
 
 We update you on the blood stock levels of the Singapore Red Cross.
 
-You can also subscribe (/subscribe) to updates for specific blood types so you know when to donate.
+You can subscribe (/subscribe) to updates for specific blood types so you know when to donate.
 
-You can use the /check command to check blood stock levels manually."""
+You can check for the latest change (/changes) in blood stock levels over the past day.
 
-ABOUT_MSG = """SG Blood Stocks Bot Version 0.3 (Beta)
+You can check blood stock levels manually (/check)."""
+
+ABOUT_MSG = """SG Blood Stocks Bot Version 0.4 (Beta)
 
 This bot retrieves blood stock data from https://www.redcross.sg/
 
