@@ -50,17 +50,17 @@ Original
  'O-': {'fill_level': '51', 'status': 'Moderate'}}
 
 """
-CURRENT_STOCKS_TEST = {
-    "A+": {"fill_level": "90", "status": "Healthy"},  # Lower fill, same state
-    "A-": {"fill_level": "69", "status": "Healthy"},
-    "AB+": {"fill_level": "100", "status": "Healthy"},
-    "AB-": {"fill_level": "20", "status": "Critical"},  # Lower fill, different state
-    "B+": {"fill_level": "100", "status": "Healthy"},
-    "B-": {"fill_level": "67", "status": "Healthy"},  # Higher fill, same state
-    "O+": {"fill_level": "100", "status": "Healthy"},
-    "O-": {"fill_level": "70", "status": "Healthy"},  # Higher fill, different state
-}
-CURRENT_STOCKS = CURRENT_STOCKS_TEST
+# CURRENT_STOCKS_TEST = {
+#     "A+": {"fill_level": "90", "status": "Healthy"},  # Lower fill, same state
+#     "A-": {"fill_level": "69", "status": "Healthy"},
+#     "AB+": {"fill_level": "100", "status": "Healthy"},
+#     "AB-": {"fill_level": "20", "status": "Critical"},  # Lower fill, different state
+#     "B+": {"fill_level": "100", "status": "Healthy"},
+#     "B-": {"fill_level": "67", "status": "Healthy"},  # Higher fill, same state
+#     "O+": {"fill_level": "100", "status": "Healthy"},
+#     "O-": {"fill_level": "70", "status": "Healthy"},  # Higher fill, different state
+# }
+# CURRENT_STOCKS = CURRENT_STOCKS_TEST
 
 # Last updated time
 LAST_BOT_UPDATE_TIME = None
@@ -126,11 +126,16 @@ def update_any_subscribers(context: CallbackContext, diffs_str):
 
     for user in users:
         if is_user_any_blood_subscription(context, user):
-            context.bot.send_message(
-                chat_id=int(user),
-                text=diffs_str,
-                parse_mode=telegram.constants.PARSEMODE_MARKDOWN,
-            )
+            try:
+                context.bot.send_message(
+                    chat_id=int(user),
+                    text=diffs_str,
+                    parse_mode=telegram.constants.PARSEMODE_MARKDOWN,
+                )
+            except Exception as e:
+                print("Exception during send!")
+                print(e.__doc__)
+                print(e.message)
 
 
 def update_subscribers_for_bloodtype(
@@ -146,11 +151,16 @@ def update_subscribers_for_bloodtype(
         if is_user_blood_subscription(
             context, user, bloodtype
         ) and not is_user_any_blood_subscription(context, user):
-            context.bot.send_message(
-                chat_id=int(user),
-                text=diffs_str,
-                parse_mode=telegram.constants.PARSEMODE_MARKDOWN,
-            )
+            try:
+                context.bot.send_message(
+                    chat_id=int(user),
+                    text=diffs_str,
+                    parse_mode=telegram.constants.PARSEMODE_MARKDOWN,
+                )
+            except Exception as e:
+                print("Exception during send!")
+                print(e.__doc__)
+                print(e.message)
 
 
 def update_stocks_interval(context: CallbackContext):
