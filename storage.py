@@ -16,6 +16,7 @@ Storage structure for bot_data is:
 
 USER_DATA = "users_data"
 USER_BLOOD_SUBSCRIPTION = "blood_subscription"
+CURRENT_DIFF = "current_diff"
 
 
 def check_init_storage(context: CallbackContext):
@@ -77,3 +78,17 @@ def is_user_blood_subscription(context: CallbackContext, user_id: str, bloodtype
         .get(USER_BLOOD_SUBSCRIPTION, None)
     )
     return bloodtype in subscription
+
+
+def update_current_diff(context: CallbackContext, diff, diffstr, difftime):
+    check_init_storage(context)
+    context.bot_data[USER_DATA][CURRENT_DIFF] = {
+        "diff": diff,
+        "diff_string": diffstr,
+        "difftime": difftime,
+    }
+
+
+def get_current_diff(context: CallbackContext, diff, diffstr, difftime):
+    check_init_storage(context)
+    return context.bot_data[USER_DATA].get(CURRENT_DIFF)

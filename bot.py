@@ -71,7 +71,7 @@ CURRENT_DIFF = None
 CURRENT_DIFF_STR = None
 
 # Datetime
-TIMEZONE = pytz.timezone("Asia/China")
+TIMEZONE = pytz.timezone("Asia/Singapore")
 
 
 def update_stocks(context: CallbackContext):
@@ -101,15 +101,16 @@ def update_stocks(context: CallbackContext):
     # Check diffs between old and current stocks
     if OLD_STOCKS is not None and CURRENT_STOCKS is not None:
         diffs = get_stock_diffs(CURRENT_STOCKS, OLD_STOCKS)
-
+        print(diffs)
         if diffs:
             # Update globals
-            CURRENT_DIFF = diffs
-            LAST_REDCROSS_UPDATE_TIME = current_time
+            # CURRENT_DIFF = diffs
+            # LAST_REDCROSS_UPDATE_TIME = current_time
             # Get a generic diffs string to send to all the alldiffs subscribers
             diffs_str = diffs_to_str(diffs, LAST_REDCROSS_UPDATE_TIME)
-            CURRENT_DIFF_STR = diffs_str
+            # CURRENT_DIFF_STR = diffs_str
             print(diffs_str)
+            update_current_diff(context, diffs, diffs_str, current_time)
             # Update all "any"-blood stock subscribers
             update_any_subscribers(context, diffs_str)
             # Update type-by-tye
