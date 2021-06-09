@@ -100,7 +100,7 @@ def get_diffs_str(diffs, key):
             int(diffs[key][FILL_CHANGE][1]) - int(diffs[key][FILL_CHANGE][0]) > 0
         )
         emoji = UP_ARROW if got_better else DOWN_ARROW
-        fill_change = f"Blood Level Changed: {diffs[key][FILL_CHANGE][0]} ➜ {diffs[key][FILL_CHANGE][1]} {emoji}\n"
+        fill_change = f"Blood Level Changed: {diffs[key][FILL_CHANGE][0]}% ➜ {diffs[key][FILL_CHANGE][1]}% {emoji}\n"
     diffs_str = f"*{key}*\n```\n{status_change}{fill_change}\n```\n"
     return diffs_str
 

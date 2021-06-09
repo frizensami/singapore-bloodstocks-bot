@@ -11,6 +11,7 @@ from telegram.ext import (
 import telegram
 import sys
 from datetime import datetime
+import pytz
 
 # Us
 from scraper import get_bloodstocks
@@ -69,6 +70,9 @@ LAST_REDCROSS_UPDATE_TIME = None
 CURRENT_DIFF = None
 CURRENT_DIFF_STR = None
 
+# Datetime
+TIMEZONE = pytz.timezone("Asia/China")
+
 
 def update_stocks(context: CallbackContext):
     global STOCKS_STR
@@ -87,7 +91,7 @@ def update_stocks(context: CallbackContext):
     CURRENT_STOCKS = new_stocks
 
     # Update our last update time
-    current_time = datetime.now()
+    current_time = pytz.utc.localize(datetime.utcnow()).astimezone(TIMEZONE)
     LAST_BOT_UPDATE_TIME = current_time
 
     # Format /check string
