@@ -88,11 +88,16 @@ def update_stocks(context: CallbackContext):
 
     # Update new stocks
     new_stocks = get_bloodstocks()
+    # If we have an error, new_stocks will return {}. Kill this run if so.
+    if not new_stocks:
+        print(f"Failed to get blood stocks! Check error log.")
+        return
     CURRENT_STOCKS = new_stocks
 
     # Update our last update time
     current_time = pytz.utc.localize(datetime.utcnow()).astimezone(TIMEZONE)
     LAST_BOT_UPDATE_TIME = current_time
+    print(f"Current time is: {str(current_time)}")
 
     # Format /check string
     stock_str = format_stocks(new_stocks, current_time)
