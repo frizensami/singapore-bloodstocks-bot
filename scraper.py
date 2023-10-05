@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 import requests
 from pprint import pprint
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 import sys
 
 URL = "https://www.redcross.sg/"
 
 BLOOD_BANK_LVL = "blood_bank_level"
-POS_NEG = [{"class_": "positives", "name": "+"}, {"class_": "negatives", "name": "-"}]
 BLOOD_GROUP_PREFIX = "blood_group"
 BLOOD_GROUPS = [
     {"class_": "a_group", "name": "A"},
@@ -32,27 +31,19 @@ def get_bloodstocks():
         page = requests.get(URL, timeout=10)
         soup = BeautifulSoup(page.content, "html.parser")
         # Cycle through positive and negative blood types
-        for pos_neg in POS_NEG:
-            pos_or_negs = soup.find(
-                "div", class_=BLOOD_BANK_LVL + " " + pos_neg["class_"]
+        for group in BLOOD_GROUPS:
+            bloodgroup_html_all = soup.find_all(
+                "div", class_=group["class_"]
             )
-            # Cycle through each blood group
-            for group in BLOOD_GROUPS:
-                bloodgroup_html = pos_or_negs.find(
-                    "div", class_=BLOOD_GROUP_PREFIX + " " + group["class_"]
-                )
-                info_text = bloodgroup_html.find("div", class_="info_text")
-                status_text = info_text.findAll("span", class_="status_text")[
-                    1
-                ].text.strip()
-                fill_level = (
-                    bloodgroup_html.findAll("div", class_="fill_humam")[0]
-                    .get("style")[8:]
-                    .split("%")[0]
-                    .strip()
-                )
-                # pprint(status_text)
-                state[group["name"] + pos_neg["name"]] = {
+            for bloodgroup_html in bloodgroup_html_all:
+                # Get the blood group text via the h3 tag's text
+                blood_group = bloodgroup_html.find("h3").text.strip()
+                # Get the status via the h5 tag under the blood-grp-text class
+                status_text = bloodgroup_html.find("h5").text.strip()
+                # Get the fill level via a comment - first child of the 'blood-grp-hover' div
+                fill_level = bloodgroup_html.find("div", class_="blood-grp-hover").find_all(string=lambda text: isinstance(text, Comment))[0].strip()
+                # Add the blood group to the state
+                state[blood_group] = {
                     "status": status_text,
                     "fill_level": fill_level,
                 }
