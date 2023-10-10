@@ -2,7 +2,9 @@
 
 Telegram bot that informs users of Singapore's blood stocks levels from https://www.redcross.sg. 
 
-Bot live at http://t.me/sgbloodstocksbot or @sgbloodstocksbot.
+Bot is live at http://t.me/sgbloodstocksbot or @sgbloodstocksbot.
+
+*Disclaimer*: This is an unofficial data source: I do not know for sure if these are the exact numbers, but I strongly believe that they are via some educated guesses. Regardless, this information comes without any warranty or guarantees of any sort.
 
 ## Features
 - `/check` current blood stocks level
