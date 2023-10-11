@@ -138,4 +138,6 @@ def diffs_with_bloodtype_to_str(diffs, bloodtype, last_update_time):
     diffs_str += (
         f"*Last Red Cross Update*: {last_update_time.strftime('%-d %B %Y %H:%M')}\n"
     )
+    diffs_str += "\n"
+    diffs_str += f"*Disclaimer*: This is not an official source of data.\n"
     return diffs_str
