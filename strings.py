@@ -2,7 +2,7 @@
 
 HELLO_MSG = """Welcome to the SG Blood Stocks Bot!
 
-We update you on the blood stock levels of the Singapore Red Cross.
+We update you on the blood stock levels of the Singapore Red Cross, as guess-timated from the Red Cross website. Disclaimer: this is not an official source of information at all.
 
 You can subscribe (/subscribe) to updates for specific blood types so you know when to donate.
 
@@ -17,7 +17,7 @@ Read this help message anytime with (/help).
 
 ABOUT_MSG = """SG Blood Stocks Bot Version 0.4 (Beta)
 
-This bot retrieves blood stock data from https://www.redcross.sg/
+This bot guess-timates blood stock data from https://www.redcross.sg/. Disclaimer: this is not an official source of information at all.
 
 Please report any bugs to the email found at https://sriramsami.com
 
